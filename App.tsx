@@ -1,9 +1,96 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sun, Moon, Github, Linkedin, Instagram, ArrowUpRight, Menu, X, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PROJECTS } from './constants.tsx';
 import { Theme, Project } from './types.ts';
+
+// ==========================================
+// INTERACTIVE GRID COMPONENT
+// ==========================================
+
+const InteractiveGrid: React.FC<{ theme: Theme }> = ({ theme }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mouse = useRef({ x: -9999, y: -9999 });
+  const dots = useRef<{ x: number; y: number; ox: number; oy: number }[]>([]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationFrameId: number;
+    const spacing = 24;
+    const radius = 1.0;
+    const hoverRadius = 120;
+    const strength = 25;
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      
+      const newDots = [];
+      for (let x = 0; x < canvas.width; x += spacing) {
+        for (let y = 0; y < canvas.height; y += spacing) {
+          newDots.push({ x, y, ox: x, oy: y });
+        }
+      }
+      dots.current = newDots;
+    };
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const opacity = theme === 'dark' ? 0.18 : 0.08;
+      const dotColor = theme === 'dark' ? `rgba(255,255,255,${opacity})` : `rgba(0,0,0,${opacity})`;
+
+      for (const d of dots.current) {
+        const dx = mouse.current.x - d.x;
+        const dy = mouse.current.y - d.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < hoverRadius) {
+          const force = (hoverRadius - dist) / hoverRadius;
+          const angle = Math.atan2(dy, dx);
+          d.x = d.ox - Math.cos(angle) * force * strength;
+          d.y = d.oy - Math.sin(angle) * force * strength;
+        } else {
+          d.x += (d.ox - d.x) * 0.08;
+          d.y += (d.oy - d.y) * 0.08;
+        }
+
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = dotColor;
+        ctx.fill();
+      }
+      animationFrameId = requestAnimationFrame(draw);
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouse.current = { x: e.clientX, y: e.clientY };
+    };
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('mousemove', handleMouseMove);
+    
+    resize();
+    draw();
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [theme]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 pointer-events-none z-0"
+    />
+  );
+};
 
 // ==========================================
 // UTILITY & SHARED COMPONENTS
@@ -51,7 +138,6 @@ const Navbar: React.FC<{ theme: Theme; toggleTheme: () => void }> = ({ theme, to
         behavior: 'smooth'
       });
       
-      // Update URL without jump
       window.history.pushState(null, '', `#${id}`);
     }
   };
@@ -151,7 +237,7 @@ const Hero: React.FC = () => (
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 1, ease: "easeOut" }}
-            className="text-brandRed text-[6rem] sm:text-[8rem] md:text-[12rem] lg:text-[15rem] font-script leading-none select-none drop-shadow-sm"
+            className="text-brandRed text-[6rem] sm:text-[8rem] md:text-[12rem] lg:text-[15rem] font-script leading-none select-none"
           >
             Portfolio
           </motion.h1>
@@ -431,13 +517,16 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen text-zinc-900 dark:text-zinc-50 font-sans selection:bg-brandRed selection:text-white transition-colors duration-300 overflow-x-hidden">
-      <Navbar theme={theme} toggleTheme={toggleTheme} />
-      <Hero />
-      <Work />
-      <About />
-      <Contact />
-      <Footer />
+    <div className="min-h-screen text-zinc-900 dark:text-zinc-50 font-sans selection:bg-brandRed selection:text-white transition-colors duration-300 overflow-x-hidden relative">
+      <InteractiveGrid theme={theme} />
+      <div className="relative z-10">
+        <Navbar theme={theme} toggleTheme={toggleTheme} />
+        <Hero />
+        <Work />
+        <About />
+        <Contact />
+        <Footer />
+      </div>
     </div>
   );
 };
