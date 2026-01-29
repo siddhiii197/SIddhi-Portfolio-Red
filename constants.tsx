@@ -18,7 +18,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 2,
-    title: "Charachter design",
+    title: "Character design",
     category: "Illustration and Research",
     image: "https://i.pinimg.com/736x/3a/b8/b5/3ab8b5645520079aa88a18efccaa8b96.jpg",
     description: "A series of digital illustrations exploring the boundary between sleep and reality.",
@@ -32,7 +32,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 3,
-    title: "Type expiriments",
+    title: "Type experiments",
     category: "Typography",
     image: "https://i.pinimg.com/originals/b9/0b/94/b90b949e7df42442fba3ad73543f0b81.gif",
     description: "An experimental variable typeface designed for fluid digital interfaces.",
@@ -94,7 +94,7 @@ export const SKILLS: Skill[] = [
 ];
 
 export const SOCIAL_LINKS = {
-  instagram: "https://instagram.com/siddhi_purohit",
-  behance: "https://behance.net/siddhipurohit",
-  linkedin: "https://linkedin.com/in/siddhipurohit"
+  instagram: "https://www.instagram.com/siddhi.purohitt/",
+  behance: "https://www.behance.net/siddhipurohit1",
+  linkedin: "https://www.linkedin.com/in/siddhi-purohit-090915308/"
 };
