@@ -1,0 +1,7 @@
+{
+  "name": "Siddhi Portfolio red",
+  "description": "A clean, minimal, and modern portfolio for Siddhi Purohit, a Communication Design student featuring illustration, typography, and web development.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

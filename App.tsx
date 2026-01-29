@@ -1,0 +1,445 @@
+
+import React, { useState, useEffect } from 'react';
+import { Sun, Moon, Github, Linkedin, Instagram, ArrowUpRight, Menu, X, Star } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { PROJECTS } from './constants.tsx';
+import { Theme, Project } from './types.ts';
+
+// ==========================================
+// UTILITY & SHARED COMPONENTS
+// ==========================================
+
+const BlurryStar: React.FC<{ className?: string }> = ({ className }) => (
+  <motion.div
+    initial={{ opacity: 0, scale: 0.8 }}
+    animate={{ opacity: 0.4, scale: 1 }}
+    transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
+    className={`absolute text-brandRed filter blur-sm select-none pointer-events-none ${className}`}
+  >
+    <svg width="120" height="120" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+    </svg>
+  </motion.div>
+);
+
+// ==========================================
+// NAVIGATION COMPONENTS
+// ==========================================
+
+const Navbar: React.FC<{ theme: Theme; toggleTheme: () => void }> = ({ theme, toggleTheme }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const navLinks = [
+    { name: 'Work', id: 'work' },
+    { name: 'About', id: 'about' },
+    { name: 'Contact', id: 'contact' },
+  ];
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    const element = document.getElementById(id);
+    if (element) {
+      setIsOpen(false);
+      const offset = 80; // Navbar height
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = element.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+      
+      // Update URL without jump
+      window.history.pushState(null, '', `#${id}`);
+    }
+  };
+
+  return (
+    <nav className="fixed w-full z-50 top-0 left-0 bg-transparent dark:bg-zinc-950/20 backdrop-blur-sm border-b border-zinc-200/20 dark:border-zinc-800/20 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <a 
+          href="#home" 
+          onClick={(e) => handleNavClick(e, 'home')}
+          className="text-xl font-bold tracking-tighter hover:opacity-70 transition-opacity"
+        >
+          SP<span className="text-brandRed">.</span>
+        </a>
+
+        <div className="hidden md:flex items-center space-x-10">
+          {navLinks.map((link) => (
+            <a
+              key={link.name}
+              href={`#${link.id}`}
+              onClick={(e) => handleNavClick(e, link.id)}
+              className="text-[10px] font-bold hover:text-brandRed transition-colors uppercase tracking-[0.3em]"
+            >
+              {link.name}
+            </a>
+          ))}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-full hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 transition-colors text-zinc-600 dark:text-zinc-400"
+            aria-label="Toggle Theme"
+          >
+            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+          </button>
+        </div>
+
+        <div className="md:hidden flex items-center space-x-4">
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-full hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 transition-colors"
+          >
+            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+          </button>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="p-2 text-zinc-900 dark:text-zinc-100"
+          >
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="absolute top-20 left-0 w-full bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 p-6 md:hidden shadow-xl"
+          >
+            <div className="flex flex-col space-y-4">
+              {navLinks.map((link) => (
+                <a
+                  key={link.name}
+                  href={`#${link.id}`}
+                  onClick={(e) => handleNavClick(e, link.id)}
+                  className="text-xl font-semibold hover:text-brandRed py-2 border-b border-zinc-100 dark:border-zinc-900"
+                >
+                  {link.name}
+                </a>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </nav>
+  );
+};
+
+// ==========================================
+// HERO SECTION
+// ==========================================
+
+const Hero: React.FC = () => (
+  <section id="home" className="relative min-h-screen flex items-center justify-center">
+    <BlurryStar className="top-[10%] right-[5%] md:right-[15%] rotate-12" />
+    <BlurryStar className="bottom-[10%] left-[5%] md:left-[10%] -rotate-12" />
+    
+    <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.5 }}
+        className="flex flex-col items-center justify-center text-center relative"
+      >
+        <div className="relative mb-4 md:mb-0">
+          <motion.h1 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="text-brandRed text-[6rem] sm:text-[8rem] md:text-[12rem] lg:text-[15rem] font-script leading-none select-none drop-shadow-sm"
+          >
+            Portfolio
+          </motion.h1>
+
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+            className="md:absolute md:bottom-[-2rem] md:left-[35%] text-left"
+          >
+            <div className="text-brandRed font-sans font-bold text-2xl md:text-3xl lg:text-4xl leading-tight tracking-tight uppercase flex flex-col">
+              <span>VISUAL</span>
+              <span>DESIGNER</span>
+            </div>
+          </motion.div>
+        </div>
+        
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.5 }}
+          transition={{ delay: 2, duration: 1 }}
+          className="absolute bottom-[-10rem] md:bottom-[-15rem]"
+        >
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-[9px] uppercase tracking-[0.4em] font-bold text-zinc-400">Scroll</span>
+            <div className="w-[1px] h-12 bg-zinc-300 dark:bg-zinc-700" />
+          </div>
+        </motion.div>
+      </motion.div>
+    </div>
+  </section>
+);
+
+// ==========================================
+// WORK SECTION
+// ==========================================
+
+const ProjectCard: React.FC<{ project: Project; index: number }> = ({ project, index }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.1, duration: 0.6 }}
+      className="group cursor-pointer"
+    >
+      <div className="relative overflow-hidden aspect-[4/3] rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 mb-4">
+        <img
+          src={project.image}
+          alt={project.title}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+        />
+        <div className="absolute inset-0 bg-brandRed/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-8">
+          <p className="text-white text-sm font-medium mb-1 uppercase tracking-widest">{project.category}</p>
+          <h3 className="text-white text-2xl font-bold mb-4">{project.title}</h3>
+          <div className="flex flex-wrap gap-2">
+            {project.tags.map(tag => (
+              <span key={tag} className="px-2 py-1 bg-white/20 backdrop-blur-sm text-white text-xs rounded-full">
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="flex justify-between items-start group-hover:px-2 transition-all duration-300">
+        <div>
+          <h3 className="text-lg font-bold">{project.title}</h3>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">{project.category}</p>
+        </div>
+        <ArrowUpRight className="text-zinc-400 group-hover:text-brandRed group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" size={20} />
+      </div>
+    </motion.div>
+  );
+};
+
+const Work: React.FC = () => (
+  <section id="work" className="py-32 bg-white/50 dark:bg-black/20 backdrop-blur-sm border-t border-zinc-200/20">
+    <div className="max-w-7xl mx-auto px-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
+        <div>
+          <span className="text-brandRed font-bold uppercase tracking-[0.3em] text-[10px] mb-4 block">Archives</span>
+          <h2 className="text-5xl md:text-7xl font-bold tracking-tighter">Curated Work</h2>
+        </div>
+        <p className="max-w-xs text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed border-l-2 border-brandRed/20 pl-6">
+          Exploring visual communication through experimental typography and brand narratives.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+        {PROJECTS.map((project, idx) => (
+          <ProjectCard key={project.id} project={project} index={idx} />
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+// ==========================================
+// ABOUT SECTION
+// ==========================================
+
+const About: React.FC = () => (
+  <section id="about" className="py-32 overflow-hidden">
+    <div className="max-w-7xl mx-auto px-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-32 items-center">
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+          className="relative"
+        >
+          <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl group">
+            <img 
+              src="https://i.pinimg.com/736x/9a/2c/96/9a2c96419df75708dbd2cbdc7e1b612e.jpg" 
+              alt="Siddhi Purohit" 
+              className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
+            />
+            <div className="absolute inset-0 bg-brandRed/10 mix-blend-overlay group-hover:bg-transparent transition-all" />
+          </div>
+          <div className="absolute -bottom-8 -right-8 w-48 h-48 bg-brandRed/5 rounded-full blur-3xl -z-10" />
+          <div className="absolute top-4 left-4 p-4 border border-brandRed/20 rounded-full bg-white/10 backdrop-blur-md">
+             <Star className="text-brandRed animate-spin-slow" size={32} fill="currentColor" />
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+        >
+          <span className="text-brandRed font-bold uppercase tracking-[0.4em] text-[10px] mb-6 block">Biography</span>
+          <h2 className="text-5xl md:text-7xl font-bold tracking-tighter mb-10">
+            About <br />
+            <span className="text-brandRed italic font-serif">me.</span> 
+          </h2>
+          
+          <div className="space-y-6 text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed font-light">
+            <p>
+              I am <strong className="text-zinc-900 dark:text-zinc-100 font-semibold">Siddhi Purohit</strong>, a communication design student dedicated to finding the intersection between raw emotion and functional aesthetics. 
+            </p>
+            <p>
+              My journey in design is fueled by a curiosity for how we perceive information and a passion for experimental typography. I believe that every brand has a heartbeat, and my role is to make it visible through intentional visual narratives.
+            </p>
+            <p>
+              Specializing in <span className="text-brandRed border-b border-brandRed/20">illustration</span> and <span className="text-brandRed border-b border-brandRed/20">brand strategy</span>, I work to create immersive experiences that go beyond the screen or the page.
+            </p>
+          </div>
+
+          <div className="mt-12 grid grid-cols-2 gap-8 pt-10 border-t border-zinc-200 dark:border-zinc-800">
+            <div>
+              <h4 className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 mb-2">Location</h4>
+              <p className="font-semibold">Ahmedabad, India</p>
+            </div>
+            <div>
+              <h4 className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 mb-2">Focus</h4>
+              <p className="font-semibold">Comm. Design</p>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  </section>
+);
+
+// ==========================================
+// CONTACT SECTION
+// ==========================================
+
+const Contact: React.FC = () => (
+  <section id="contact" className="py-32 bg-brandRed text-white">
+    <div className="max-w-7xl mx-auto px-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+        <div>
+          <span className="text-white/60 font-bold uppercase tracking-[0.3em] text-[10px] mb-6 block">Contact</span>
+          <h2 className="text-6xl md:text-8xl font-bold tracking-tighter mb-12">
+            Let's connect. <br />
+            
+          </h2>
+          <p className="text-xl text-white/80 mb-12 max-w-md font-medium leading-relaxed">
+            Open to collaborations, internships, and conversations about the future of visual design.
+          </p>
+          <div className="flex flex-col space-y-6">
+            <a href="mailto:siddhipurohit64@gmail.com" className="text-3xl md:text-4xl font-bold hover:text-zinc-900 transition-colors flex items-center gap-4 group w-fit">
+              siddhipurohit64@gmail.com
+              <ArrowUpRight className="opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0" size={32} />
+            </a>
+            <div className="flex space-x-4">
+              {[Github, Linkedin, Instagram].map((Icon, idx) => (
+                <a key={idx} href="#" className="p-4 border border-white/20 rounded-full hover:bg-white hover:text-brandRed transition-all">
+                  <Icon size={24} />
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/10 backdrop-blur-md p-10 md:p-14 rounded-[3rem] border border-white/20">
+          <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="border-b border-white/30 py-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-white/60">Name</label>
+                <input type="text" className="w-full bg-transparent outline-none pt-2 placeholder:text-white/30" placeholder="Your Name" />
+              </div>
+              <div className="border-b border-white/30 py-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-white/60">Email</label>
+                <input type="email" className="w-full bg-transparent outline-none pt-2 placeholder:text-white/30" placeholder="your@email.com" />
+              </div>
+            </div>
+            <div className="border-b border-white/30 py-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-white/60">Message</label>
+              <textarea rows={4} className="w-full bg-transparent outline-none pt-2 placeholder:text-white/30 resize-none" placeholder="How can I help you?" />
+            </div>
+            <button
+              type="submit"
+              className="w-full py-5 bg-white text-brandRed font-bold rounded-2xl hover:scale-[1.02] transition-transform shadow-xl uppercase tracking-widest text-xs"
+            >
+              Send Message
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+// ==========================================
+// FOOTER SECTION
+// ==========================================
+
+const Footer: React.FC = () => (
+  <footer className="py-12 px-6">
+    <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 border-t border-zinc-200 dark:border-zinc-800 pt-12">
+      <div className="flex flex-col items-center md:items-start">
+         <span className="text-xl font-bold tracking-tighter">SP<span className="text-brandRed">.</span></span>
+         <p className="text-[10px] uppercase tracking-widest text-zinc-400 mt-2">Communication Design</p>
+      </div>
+      <p className="text-zinc-500 text-[10px] uppercase tracking-[0.2em]">
+        © {new Date().getFullYear()} Siddhi Purohit.
+      </p>
+      <div className="flex space-x-12 text-[10px] font-bold uppercase tracking-widest">
+        <a href="#" className="hover:text-brandRed transition-colors">Behance</a>
+        <a href="#" className="hover:text-brandRed transition-colors">Instagram</a>
+      </div>
+    </div>
+  </footer>
+);
+
+// ==========================================
+// MAIN APP COMPONENT
+// ==========================================
+
+const App: React.FC = () => {
+  const [theme, setTheme] = useState<Theme>('light');
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as Theme | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setTheme('dark');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
+  };
+
+  return (
+    <div className="min-h-screen text-zinc-900 dark:text-zinc-50 font-sans selection:bg-brandRed selection:text-white transition-colors duration-300 overflow-x-hidden">
+      <Navbar theme={theme} toggleTheme={toggleTheme} />
+      <Hero />
+      <Work />
+      <About />
+      <Contact />
+      <Footer />
+    </div>
+  );
+};
+
+export default App;
