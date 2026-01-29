@@ -5,6 +5,8 @@ export interface Project {
   category: string;
   image: string;
   description: string;
+  longDescription: string;
+  contentImages: string[];
   tags: string[];
 }
 
